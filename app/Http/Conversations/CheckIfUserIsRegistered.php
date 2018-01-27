@@ -68,9 +68,11 @@ class CheckIfUserIsRegistered extends Conversation
                     return $this->sayRegisterRoute();
                 }
 
-                $this->linkMessengerToUserAccount($user);             
+                return $this->linkMessengerToUserAccount($user);             
             });
         }
+
+        $this->askForRightAccount(possibleAccounts);
     }
 
     /**
@@ -86,7 +88,7 @@ class CheckIfUserIsRegistered extends Conversation
      * [linkMessengerToUserAccount description]
      * @return [type] [description]
      */
-    public function linkMessengerToUserAccount()
+    public function linkMessengerToUserAccount($user)
     {
         $question = Question::create("Ok I will link you with {$user->username}`s account.")
             ->callbackId('link_messenger_confirmation')
@@ -110,6 +112,31 @@ class CheckIfUserIsRegistered extends Conversation
         });
     }
 
+    public function askForRightAccount($users)
+    {
+        $buttons = $users->map(function ($user) {
+            return Button::create($user->username)->value($user->username);
+        })->toArray();
+
+        $question = Question::create("Please select your username!")
+            ->callbackId('select_user_name')
+            ->addButtons($buttons);
+
+        return $this->ask($question, function (Answer $response) use ($users) {
+            if (! $response->isInteractiveMessageReply()) {
+                $this->say('Please click on one of the names');
+                return $this->askForRightAccount($users);
+            }
+
+            $user = User::whereUsername($response->getValue())->first();
+            $this->linkMessengerToUserAccount($user);
+        });
+    }
+
+    /**
+     * @param  IncomingMessage $message [description]
+     * @return [type]                   [description]
+     */
     public function stopsConversation(IncomingMessage $message)
     {
         if ($message->getText() == 'stop') {
@@ -119,7 +146,10 @@ class CheckIfUserIsRegistered extends Conversation
         return false;
     }
 
-
+    /**
+     * @param  IncomingMessage $message [description]
+     * @return [type]                   [description]
+     */
     public function skipsConversation(IncomingMessage $message)
     {
         if ($message->getText() == 'pause') {
