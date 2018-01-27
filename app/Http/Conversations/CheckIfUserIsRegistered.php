@@ -109,4 +109,23 @@ class CheckIfUserIsRegistered extends Conversation
             }
         });
     }
+
+    public function stopsConversation(IncomingMessage $message)
+    {
+        if ($message->getText() == 'stop') {
+            return true;
+        }
+
+        return false;
+    }
+
+
+    public function skipsConversation(IncomingMessage $message)
+    {
+        if ($message->getText() == 'pause') {
+            return true;
+        }
+
+        return false;
+    }
 }
