@@ -152,6 +152,10 @@ class RegisterCard extends Conversation
     	});
     }
 
+    /**
+     * [displayInformation description]
+     * @return [type] [description]
+     */
     public function displayInformation()
     {
     	$storage = $this->bot->userStorage()->find('card');
@@ -163,6 +167,19 @@ class RegisterCard extends Conversation
     	$this->say('Preisstufe: '.$storage->get('price_category'));
     	$this->say('Gültig bis: '.$storage->get('valid_until'));
 
-    	return;
+        return $this->ask('Stimmt alles soweit?', function (Answer $response) use ($storage) {
+            if ($response->getText() === 'Ja' || $response->getText() === 'y' || $response->getText() === 'yes') {
+                $travelCard = new TravelCard([
+                    'type' => $storage->get('type'),
+                    'group' => $storage->get('group'),
+                    'period_type' => $storage->get('period_type'),
+                    'price_category' => $storage->get('price_category'),
+                    'valid_until' => $storage->get('valid_until'),
+                ]);
+
+                $travelCard->user()->associate($this->user);
+                $travelCard->save();
+            }
+        })
     }
 }
