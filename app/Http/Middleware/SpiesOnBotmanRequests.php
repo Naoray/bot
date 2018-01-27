@@ -2,12 +2,14 @@
 
 namespace App\Http\Middleware;
 
+use App\User;
 use BotMan\BotMan\BotMan;
 use BotMan\BotMan\Interfaces\Middleware\Heard;
 use BotMan\BotMan\Interfaces\Middleware\Sending;
 use BotMan\BotMan\Interfaces\Middleware\Captured;
 use BotMan\BotMan\Interfaces\Middleware\Matching;
 use BotMan\BotMan\Interfaces\Middleware\Received;
+use App\Http\Conversations\CheckIfUserIsRegistered;
 use BotMan\BotMan\Messages\Incoming\IncomingMessage;
 
 class SpiesOnBotmanRequests implements Received, Captured, Matching, Heard, Sending
@@ -62,6 +64,14 @@ class SpiesOnBotmanRequests implements Received, Captured, Matching, Heard, Send
      */
     public function heard(IncomingMessage $message, $next, BotMan $bot)
     {
+        // $botUser = $bot->getUser();
+
+        // $users = User::messenger($botUser)->get();
+
+        // if ($users->count() == 0) {
+        //     // return $bot->startConversation(new CheckIfUserIsRegistered());
+        // }
+
         return $next($message);
     }
 

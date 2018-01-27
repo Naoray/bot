@@ -20,6 +20,7 @@ class BotManController extends Controller
         $botman = app('botman');
 
         $botman->middleware->sending(new SpiesOnBotmanRequests());
+        $botman->middleware->heard(new SpiesOnBotmanRequests());
 
         $botman->listen();
     }

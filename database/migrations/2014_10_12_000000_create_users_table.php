@@ -23,7 +23,8 @@ class CreateUsersTable extends Migration
             $table->string('street');
             $table->string('zip');
             $table->string('city');
-            $table->string('messenger_id');
+            $table->string('messenger_id')->nullable();
+            $table->string('messenger_type')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
