@@ -13,7 +13,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        $botman = resolve('botman');
+
+        $botman->hears('/help', function ($bot) {
+            $bot->reply('Available Commands:');
+
+            foreach (config('botman.commands') as $command => $data) {
+                $bot->reply("{$command} - {$data['description']}");
+            }
+
+            $bot->reply('Try one of those.');
+        });
+
+        foreach (config('botman.commands') as $command => $data) {
+            if ($command !== '/help') {
+                $botman->hears($command, $data['entry_point']);
+            }
+        }
     }
 
     /**
