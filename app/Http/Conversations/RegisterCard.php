@@ -2,6 +2,8 @@
 
 namespace App\Http\Conversations;
 
+use App\User;
+use App\TravelCard;
 use BotMan\BotMan\Messages\Incoming\Answer;
 use BotMan\BotMan\Messages\Outgoing\Question;
 use BotMan\BotMan\Messages\Outgoing\Actions\Button;
@@ -16,6 +18,12 @@ class RegisterCard extends Conversation
      */
     public function run()
     {
+        $this->user = User::messenger($this->bot->getUser()->getId())->first();
+
+        if (! $this->user) {
+            return $this->bot->startConversation(new CheckIfUserIsRegistered());
+        }
+
         $this->askForType();
     }
 
@@ -167,7 +175,18 @@ class RegisterCard extends Conversation
     	$this->say('Preisstufe: '.$storage->get('price_category'));
     	$this->say('Gültig bis: '.$storage->get('valid_until'));
 
-        return $this->ask('Stimmt alles soweit?', function (Answer $response) use ($storage) {
+        $question = Question::create('Stimmt alles soweit?')
+            ->callbackId('ask_for_card_confirmation')
+            ->addButtons([
+                Button::create('Yes')->value('yes'),
+                Button::create('No')->value('no'),
+            ]);
+
+        return $this->ask($question, function (Answer $response) use ($storage) {
+            $answer = $response->isInteractiveMessageReply() 
+                            ? $response->getValue() 
+                            : $response->getText();
+
             if ($response->getText() === 'Ja' || $response->getText() === 'y' || $response->getText() === 'yes') {
                 $travelCard = new TravelCard([
                     'type' => $storage->get('type'),
@@ -177,9 +196,13 @@ class RegisterCard extends Conversation
                     'valid_until' => $storage->get('valid_until'),
                 ]);
 
-                $travelCard->user()->associate($this->user);
+                $travelCard->user()->associate($this->user->id);
                 $travelCard->save();
+
+                return $this->say('Your card got added!');
             }
-        })
+
+            $this->say("Ok won't add this one.");
+        });
     }
 }

@@ -58,7 +58,7 @@ class CheckIfUserIsRegistered extends Conversation
     {
         $botUser = $this->bot->getUser();
 
-        $possibleAccounts = User::messenger($botUser)->get();
+        $possibleAccounts = User::anticipate($botUser)->get();
 
         if ($possibleAccounts->count() == 0) {
             $this->ask("I couldn't find any user matching your messenger's data. What is the username you registered with?", function (Answer $answer) {

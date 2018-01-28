@@ -37,16 +37,30 @@ class User extends Authenticatable
     ];
 
     /**
-     * [scopeMessenger description]
+     * Get user by messenger id.
+     * 
+     * @param  [type] $query       [description]
+     * @param  [type] $messengerId [description]
+     * @return [type]              [description]
+     */
+    public function scopeMessenger($query, $messengerId)
+    {
+        return $query->whereMessengerId($messengerId);
+    }
+
+    /**
+     * Anticipate user account by name & username.
+     * 
      * @param  [type] $query   [description]
      * @param  [type] $botUser [description]
      * @return [type]          [description]
      */
-    public function scopeMessenger($query, $botUser)
+    public function scopeAnticipateUser($query, $botUser)
     {
-        return $query->whereMessengerId($botUser->getId())
-                ->orWhere('first_name', $botUser->getFirstName())
-                ->orWhere('last_name', $botUser->getLastName())
-                ->orWhere('username', $botUser->getUsername());
+        return $query->orWhere([
+                    ['first_name', $botUser->getFirstName()],
+                    ['last_name', $botUser->getLastName()],
+                    ['username', $botUser->getUsername()]
+                ]);
     }
 }
